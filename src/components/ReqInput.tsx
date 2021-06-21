@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   InputGroup,
   InputLeftAddon,
@@ -13,12 +13,17 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import axios from "axios";
 
+import QueryParamContext from "../Contexts/QueryParamContext";
+
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 const ReqInput = () => {
   const methods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE"];
   const [currentMethod, setCurrentMethod] = useState<Method>("GET");
   const [URL, setURL] = useState<string>("");
+  // TODO remove ts-ignore
+  // @ts-ignore
+  const { query } = useContext(QueryParamContext);
 
   const onSubmit = (e: Event | any) => {
     e.preventDefault();
@@ -50,7 +55,7 @@ const ReqInput = () => {
             </Menu>
           </InputLeftAddon>
           <Input
-            value={URL}
+            value={URL + query}
             onChange={(e) => setURL(e.target.value)}
             type="text"
             placeholder="URL"
