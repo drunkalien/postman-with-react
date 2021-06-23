@@ -12,26 +12,35 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import axios from "axios";
-
 import QueryParamContext from "../Contexts/QueryParamContext";
+import { useForm } from "react-hook-form";
+import qs from "querystring";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 const ReqInput = () => {
   const methods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE"];
   const [currentMethod, setCurrentMethod] = useState<Method>("GET");
-  const [URL, setURL] = useState<string>("");
   // TODO remove ts-ignore
   // @ts-ignore
   const { query } = useContext(QueryParamContext);
 
-  const onSubmit = (e: Event | any) => {
-    e.preventDefault();
+  const { register, getValues, setValue, handleSubmit } = useForm();
+  const onSubmit = handleSubmit(({ url }) => {
     console.log(currentMethod);
-    console.log(URL);
     const method: any = currentMethod.toLowerCase();
-    axios({ method, url: URL }).then((res) => console.log(res.data));
-  };
+    // axios({ method, url, params: query }).then((res) => console.log(res.data));
+    axios({ method, url }).then((res) => console.log(res.data));
+  });
+
+  useEffect(() => {
+    if (
+      getValues().url.trim() !== "" &&
+      !getValues().url.includes(qs.stringify(query as any))
+    ) {
+      setValue("url", `${getValues().url + "?" + qs.stringify(query as any)}`);
+    }
+  }, [query]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -54,12 +63,7 @@ const ReqInput = () => {
               </MenuList>
             </Menu>
           </InputLeftAddon>
-          <Input
-            value={URL + query}
-            onChange={(e) => setURL(e.target.value)}
-            type="text"
-            placeholder="URL"
-          />
+          <Input {...register("url")} type="text" placeholder="URL" />
         </InputGroup>
         <Button type="submit" colorScheme="teal" width={100}>
           Send
